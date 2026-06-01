@@ -477,11 +477,12 @@
       }
       window.BIZTRACK_USER = session.user;
       window.BIZTRACK_SB   = sb;
+      document.body.style.visibility = 'visible';
     })();
   </script>
   <!-- ═══ END AUTH GUARD ═══ -->
 </head>
-<body>
+  <body style="visibility:hidden">
 <div id="app">
 
   <!-- ═══ BUSINESS SELECTION SCREEN ═══ -->
