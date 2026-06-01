@@ -65,7 +65,7 @@
 
     #app{min-height:100vh;display:flex;flex-direction:column}
     #biz-screen{min-height:100vh;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px}
-    #main-screen{display:none;flex-direction:column;min-height:100vh}
+    #main-screen{display:none;flex-direction:column;height:100vh;overflow:hidden}
 
     header{background:var(--s1);border-bottom:1px solid var(--b1);position:sticky;top:0;z-index:200}
     .header-inner{max-width:860px;margin:0 auto;padding:0 16px;height:52px;display:flex;align-items:center;justify-content:space-between;gap:10px}
@@ -84,7 +84,7 @@
     .tab-btn.active .tab-icon{filter:drop-shadow(0 0 6px rgba(56,189,248,.5))}
     .tab-badge{position:absolute;top:4px;right:10px;background:#f43f5e;color:#fff;font-size:8px;font-weight:700;border-radius:99px;min-width:14px;height:14px;display:flex;align-items:center;justify-content:center;padding:0 3px;font-family:'JetBrains Mono',monospace}
 
-    main{flex:1;max-width:860px;margin:0 auto;width:100%;padding:22px 16px 90px}
+    main{flex:1;max-width:860px;margin:0 auto;width:100%;padding:22px 16px 24px;overflow-y:auto;overflow-x:hidden}
 
     .tab-panel{display:none}
     .tab-panel.active{display:block;animation:fadeUp .25s ease both}
@@ -159,7 +159,7 @@
     .btn-save-note{background:linear-gradient(135deg,#38bdf8,#818cf8);border:none;border-radius:9px;padding:8px 20px;font-size:12px;font-weight:600;color:#fff;transition:opacity .15s}
     .btn-save-note:hover{opacity:.88}
 
-    .app-credit{text-align:center;padding:4px 0;font-size:10px;color:var(--t3);font-family:'JetBrains Mono',monospace;letter-spacing:.04em;opacity:.55;pointer-events:none;user-select:none;position:fixed;bottom:0;left:0;right:0;z-index:100;background:var(--bg);border-top:1px solid var(--b1)}
+    .app-credit{text-align:center;padding:10px 0 6px;font-size:10px;color:var(--t3);font-family:'JetBrains Mono',monospace;letter-spacing:.04em;opacity:.55;pointer-events:none;user-select:none}
 
     /* ═══ HISTORY REDESIGN — weekly/monthly aligned ═══ */
     .hist-month-group{margin-bottom:20px}
@@ -462,27 +462,33 @@
     }
   </script>
 
-  <!-- ═══ SUPABASE AUTH GUARD ═══ -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    (async () => {
-      const SUPABASE_URL  = 'https://qyrhucktnxegvpqsgcgg.supabase.co';
-      const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF5cmh1Y2t0bnhlZ3ZwcXNnY2dnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNzMwNzksImV4cCI6MjA5NTg0OTA3OX0.nEsXgjJmU1RoE1EHW4PDkGcPjvXH79k_qzzFwewBSxg';
-      const { createClient } = supabase;
-      const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
-      const { data: { session } } = await sb.auth.getSession();
-      if (!session) {
+  <!-- ═══ FIREBASE AUTH GUARD ═══ -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
+    const firebaseConfig = {
+      apiKey: "AIzaSyALqvZWOQvN9piT4_bG1Daj7yaZTDUVZ70",
+      authDomain: "biztrack-pro-fa417.firebaseapp.com",
+      projectId: "biztrack-pro-fa417",
+      storageBucket: "biztrack-pro-fa417.firebasestorage.app",
+      messagingSenderId: "284853442469",
+      appId: "1:284853442469:web:83e14876ceaf07c53dfa4c"
+    };
+    const app  = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        window.BIZTRACK_USER = user;
+        window.BIZTRACK_AUTH = auth;
+        document.body.style.visibility = 'visible';
+      } else {
         window.location.replace('auth.html');
-        return;
       }
-      window.BIZTRACK_USER = session.user;
-      window.BIZTRACK_SB   = sb;
-      document.body.style.visibility = 'visible';
-    })();
+    });
   </script>
-  <!-- ═══ END AUTH GUARD ═══ -->
+  <!-- ═══ END FIREBASE AUTH GUARD ═══ -->
 </head>
-  <body style="visibility:hidden">
+<body>
 <div id="app">
 
   <!-- ═══ BUSINESS SELECTION SCREEN ═══ -->
@@ -529,8 +535,8 @@
           </div>
         </div>
         <div class="header-right">
-          <button class="theme-btn" onclick="toggleTheme()">☀️</button>
-          <button class="theme-btn" id="logoutBtn" title="Sign out" onclick="handleLogout()" style="font-size:13px;color:var(--t3)">⎋</button>
+          <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">☀️</button>
+          <button class="theme-btn" id="logoutBtn" title="Sign out" onclick="handleLogout()" style="font-size:13px">⎋</button>
         </div>
       </div>
     </header>
@@ -853,6 +859,7 @@
       </div>
 
     </main>
+    <div class="app-credit" style="padding:8px 0 4px">designed &amp; built by ayeshatofajjol</div>
 
     <!-- ════ BOTTOM TAB BAR (6 tabs) ════ -->
     <nav class="tab-bar">
@@ -2579,10 +2586,12 @@ if ("serviceWorker" in navigator) {
 ════════════════════════════════════════════ */
 async function handleLogout() {
   if (!confirm('Sign out of BizTrack?')) return;
-  if (window.BIZTRACK_SB) await window.BIZTRACK_SB.auth.signOut();
+  if (window.BIZTRACK_AUTH) {
+    const { signOut } = await import("https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js");
+    await signOut(window.BIZTRACK_AUTH);
+  }
   window.location.replace('auth.html');
 }
 </script>
-  <div class="app-credit">designed &amp; built by ayeshatofajjol</div>
 </body>
 </html>
